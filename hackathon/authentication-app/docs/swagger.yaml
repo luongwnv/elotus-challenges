@@ -1,0 +1,12 @@
+info:
+  contact: {}
+  description: API documentation for SIMPLE AUTHENTICATION APP services
+  title: SIMPLE AUTHENTICATION APP API
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
