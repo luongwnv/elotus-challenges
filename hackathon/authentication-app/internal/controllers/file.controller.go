@@ -20,7 +20,7 @@ type FileController struct {
 // @Tags File
 // @Accept multipart/form-data
 // @Produce json
-// @Param data formData file true "Image file to upload"
+// @Param file formData file true "Image file to upload"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 413 {object} map[string]string
@@ -30,7 +30,7 @@ func (ac *AuthController) UploadFile(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uuid.UUID)
 
 	// Get file from form
-	file, err := c.FormFile("data")
+	file, err := c.FormFile("file")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "No file provided or invalid form data",

@@ -145,7 +145,7 @@ paths:
       parameters:
       - description: Image file to upload
         in: formData
-        name: data
+        name: file
         required: true
         type: file
       produces:

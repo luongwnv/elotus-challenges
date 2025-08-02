@@ -181,7 +181,7 @@ const docTemplate = `{
                     {
                         "type": "file",
                         "description": "Image file to upload",
-                        "name": "data",
+                        "name": "file",
                         "in": "formData",
                         "required": true
                     }
