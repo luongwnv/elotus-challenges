@@ -112,6 +112,31 @@ paths:
       summary: Register a new user
       tags:
       - Auth
+  /auth/revoke:
+    post:
+      consumes:
+      - application/json
+      description: Revoke the current user's JWT token (blacklist it)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke token
+      tags:
+      - Auth
 securityDefinitions:
   BearerAuth:
     in: header

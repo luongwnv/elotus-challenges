@@ -5,6 +5,7 @@ import (
 	dto "authentication-app/internal/DTOs"
 	"authentication-app/internal/models"
 	"authentication-app/pkg/utils"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -171,5 +172,38 @@ func (ac *AuthController) Login(c *fiber.Ctx) error {
 			ID:       user.ID,
 			Username: user.Username,
 		},
+	})
+}
+
+// @Summary Revoke token
+// @Description Revoke the current user's JWT token (blacklist it)
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Security BearerAuth
+// @Router /auth/revoke [post]
+func (ac *AuthController) RevokeToken(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(uuid.UUID)
+	tokenID := c.Locals("token_id").(string)
+
+	fmt.Printf("Revoking token for user %s with token ID %s\n", userID, tokenID)
+
+	revokedToken := models.RevokedToken{
+		TokenID:   tokenID,
+		UserID:    userID,
+		RevokedAt: time.Now(),
+	}
+
+	if err := ac.db.Create(&revokedToken).Error; err != nil {
+		ac.logger.Errorf("Failed to revoke token: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to revoke token",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Token revoked successfully",
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"authentication-app/config"
 	_ "authentication-app/docs"
 	"authentication-app/internal/controllers"
+	"authentication-app/internal/middleware"
 	database "authentication-app/pkg/database/postgresql"
 	"fmt"
 	"os"
@@ -126,6 +127,9 @@ func (s *Server) MapHandlers() error {
 	authGroup := app.Group("/auth")
 	authGroup.Post("/register", authController.Register)
 	authGroup.Post("/login", authController.Login)
+
+	jwtMiddleware := middleware.JWTAuth(s.cfg, s.rdbIns)
+	authGroup.Post("/revoke", jwtMiddleware, authController.RevokeToken)
 
 	golog.Info("Loaded all route!")
 

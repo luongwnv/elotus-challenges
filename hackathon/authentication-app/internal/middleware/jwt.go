@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -65,13 +66,18 @@ func JWTAuth(cfg *config.Config, db *gorm.DB) fiber.Handler {
 			})
 		}
 
-		userIDFloat, ok := claims["user_id"].(float64)
+		userIDStr, ok := claims["user_id"].(string)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid user ID",
 			})
 		}
-		userID := uint(userIDFloat)
+		userID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid user ID format",
+			})
+		}
 
 		// Check if token is revoked
 		var revokedToken models.RevokedToken
