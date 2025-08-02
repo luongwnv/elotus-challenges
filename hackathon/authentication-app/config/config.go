@@ -65,6 +65,10 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("postgresql_timeout", "POSTGRESQL_TIMEOUT")
 	viper.BindEnv("postgresql_debug", "POSTGRESQL_DEBUG")
 
+	viper.BindEnv("logger_encoding", "LOGGER_ENCODING")
+	viper.BindEnv("logger_level", "LOGGER_LEVEL")
+	viper.BindEnv("logger_full_path_caller", "LOGGER_FULL_PATH_CALLER")
+
 	viper.BindEnv("jwt_secret", "JWT_SECRET")
 	viper.BindEnv("jwt_expire_minutes", "JWT_EXPIRE_MINUTES")
 
