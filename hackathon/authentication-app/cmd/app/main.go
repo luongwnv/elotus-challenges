@@ -117,6 +117,160 @@ func (s *Server) MapHandlers() error {
 		Format:     "[${ip}] ${time} ${locals:requestid} ${method} ${path} ${status} ${latency}\n",
 	}))
 
+	// HTML pages
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Type("html").SendString(`
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Authentication App</title>
+				<style>
+					body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+					.container { background: #f5f5f5; padding: 30px; border-radius: 8px; }
+					input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+					button { background: #007bff; color: white; border: none; cursor: pointer; }
+					button:hover { background: #0056b3; }
+					.hidden { display: none; }
+					.success { color: green; }
+					.error { color: red; }
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<h2>Login</h2>
+					<div id="loginForm">
+						<input type="text" id="username" placeholder="Username" required>
+						<input type="password" id="password" placeholder="Password" required>
+						<button onclick="login()">Login</button>
+						<button onclick="register()">Register</button>
+					</div>
+					
+					<div id="uploadForm" class="hidden">
+						<h3>Upload File</h3>
+						<input type="file" id="fileInput">
+						<button onclick="uploadFile()">Upload</button>
+						<button onclick="logout()">Logout</button>
+					</div>
+					
+					<div id="message"></div>
+				</div>
+
+				<script>
+					let token = localStorage.getItem('authToken');
+					
+					if (token) {
+						showUploadForm();
+					}
+
+					function showMessage(msg, isError = false) {
+						const messageDiv = document.getElementById('message');
+						messageDiv.textContent = msg;
+						messageDiv.className = isError ? 'error' : 'success';
+					}
+
+					function showUploadForm() {
+						document.getElementById('loginForm').classList.add('hidden');
+						document.getElementById('uploadForm').classList.remove('hidden');
+					}
+
+					function showLoginForm() {
+						document.getElementById('loginForm').classList.remove('hidden');
+						document.getElementById('uploadForm').classList.add('hidden');
+					}
+
+					async function register() {
+						const username = document.getElementById('username').value;
+						const password = document.getElementById('password').value;
+
+						try {
+							const response = await fetch('/auth/register', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ username, password })
+							});
+
+							const data = await response.json();
+							if (response.ok) {
+								localStorage.setItem('authToken', data.token);
+								token = data.token;
+								showUploadForm();
+								showMessage('Registration successful!');
+							} else {
+								showMessage(data.error, true);
+							}
+						} catch (error) {
+							showMessage('Network error', true);
+						}
+					}
+
+					async function login() {
+						const username = document.getElementById('username').value;
+						const password = document.getElementById('password').value;
+
+						try {
+							const response = await fetch('/auth/login', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ username, password })
+							});
+
+							const data = await response.json();
+							if (response.ok) {
+								localStorage.setItem('authToken', data.token);
+								token = data.token;
+								showUploadForm();
+								showMessage('Login successful!');
+							} else {
+								showMessage(data.error, true);
+							}
+						} catch (error) {
+							showMessage('Network error', true);
+						}
+					}
+
+					async function uploadFile() {
+						const fileInput = document.getElementById('fileInput');
+						const file = fileInput.files[0];
+
+						if (!file) {
+							showMessage('Please select a file', true);
+							return;
+						}
+
+						const formData = new FormData();
+						formData.append('file', file);
+
+						try {
+							const response = await fetch('/files/upload', {
+								method: 'POST',
+								headers: { 'Authorization': 'Bearer ' + token },
+								body: formData
+							});
+
+							const data = await response.json();
+							if (response.ok) {
+								showMessage('File uploaded successfully!');
+								fileInput.value = '';
+							} else {
+								showMessage(data.error, true);
+							}
+						} catch (error) {
+							showMessage('Upload failed', true);
+						}
+					}
+
+					function logout() {
+						localStorage.removeItem('authToken');
+						token = null;
+						showLoginForm();
+						showMessage('Logged out successfully!');
+					}
+				</script>
+			</body>
+			</html>
+		`)
+	})
+
 	// Health check routes
 	monitoringHandler := controllers.NewHandler(s.cfg, s.logger, s.rdbIns)
 	app.Get("/api/readiness", timeout.New(monitoringHandler.Readiness, time.Duration(s.cfg.ServerCtxDefaultTimeout)*time.Second))
