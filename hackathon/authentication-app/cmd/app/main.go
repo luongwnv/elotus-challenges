@@ -125,6 +125,7 @@ func (s *Server) MapHandlers() error {
 	authController := controllers.NewAuthController(s.cfg, s.logger, s.rdbIns)
 	authGroup := app.Group("/auth")
 	authGroup.Post("/register", authController.Register)
+	authGroup.Post("/login", authController.Login)
 
 	golog.Info("Loaded all route!")
 

@@ -115,3 +115,61 @@ func (ac *AuthController) Register(c *fiber.Ctx) error {
 		},
 	})
 }
+
+// @Summary Login user
+// @Description Login with username and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dto.LoginRequest true "Login credentials"
+// @Success 200 {object} dto.AuthResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/login [post]
+func (ac *AuthController) Login(c *fiber.Ctx) error {
+	var req dto.LoginRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Find user
+	var user models.User
+	if err := ac.db.Where("username = ?", req.Username).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid credentials",
+			})
+		}
+		ac.logger.Errorf("Database error: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
+	// Check password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid credentials",
+		})
+	}
+
+	// Generate JWT token
+	token, expiresAt, err := utils.GenerateJWTToken(user.ID, user.Username, ac.cfg.JWTSecret, ac.cfg.JWTExpireMinutes)
+	if err != nil {
+		ac.logger.Errorf("Failed to generate token: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate token",
+		})
+	}
+
+	return c.JSON(dto.AuthResponse{
+		Token:     token,
+		ExpiresAt: expiresAt,
+		User: dto.UserInfo{
+			ID:       user.ID,
+			Username: user.Username,
+		},
+	})
+}
