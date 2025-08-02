@@ -10,9 +10,20 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	golog "github.com/luongwnv/go-log"
+	"gorm.io/gorm"
 )
 
 type FileController struct {
+	logger golog.Logger
+	db     *gorm.DB
+}
+
+func NewFileController(logger golog.Logger, db *gorm.DB) *FileController {
+	return &FileController{
+		logger: logger,
+		db:     db,
+	}
 }
 
 // @Summary Upload file
@@ -26,7 +37,7 @@ type FileController struct {
 // @Failure 413 {object} map[string]string
 // @Security BearerAuth
 // @Router /files/upload [post]
-func (ac *AuthController) UploadFile(c *fiber.Ctx) error {
+func (ac *FileController) UploadFile(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uuid.UUID)
 
 	// Get file from form
