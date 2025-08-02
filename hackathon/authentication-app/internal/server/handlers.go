@@ -222,6 +222,7 @@ func (s *Server) MapHandlers() error {
 	jwtMiddleware := middleware.JWTAuth(s.cfg, s.rdbIns)
 	authGroup.Post("/revoke", jwtMiddleware, authController.RevokeToken)
 
+	// File upload routes
 	fileController := controllers.NewFileController(s.logger, s.rdbIns)
 	fileGroup := app.Group("/files")
 	fileGroup.Post("/upload", jwtMiddleware, fileController.UploadFile)

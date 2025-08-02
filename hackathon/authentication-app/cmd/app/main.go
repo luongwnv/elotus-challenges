@@ -4,7 +4,7 @@ import (
 	"authentication-app/config"
 	_ "authentication-app/docs"
 	server "authentication-app/internal/server"
-	database "authentication-app/pkg/database/postgresql"
+	database "authentication-app/pkg/database"
 	"os"
 	"os/signal"
 	"path"
