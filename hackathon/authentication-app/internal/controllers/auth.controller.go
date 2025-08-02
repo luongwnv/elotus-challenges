@@ -5,7 +5,6 @@ import (
 	dto "authentication-app/internal/DTOs"
 	"authentication-app/internal/models"
 	"authentication-app/pkg/utils"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -188,9 +187,8 @@ func (ac *AuthController) RevokeToken(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uuid.UUID)
 	tokenID := c.Locals("token_id").(string)
 
-	fmt.Printf("Revoking token for user %s with token ID %s\n", userID, tokenID)
-
 	revokedToken := models.RevokedToken{
+		ID:        uuid.New(),
 		TokenID:   tokenID,
 		UserID:    userID,
 		RevokedAt: time.Now(),

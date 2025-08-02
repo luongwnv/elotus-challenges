@@ -83,7 +83,7 @@ func JWTAuth(cfg *config.Config, db *gorm.DB) fiber.Handler {
 		var revokedToken models.RevokedToken
 		if err := db.Where("token_id = ?", tokenID).First(&revokedToken).Error; err == nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Token has been revoked",
+				"error": "Session has been expired. Please login again.",
 			})
 		}
 

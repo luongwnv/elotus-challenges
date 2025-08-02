@@ -4,8 +4,6 @@ CREATE TABLE IF NOT EXISTS "authentication-app"."revoked_tokens" (
     token_id VARCHAR(255) NOT NULL UNIQUE,
     user_id UUID NULL,
     revoked_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NULL,
     FOREIGN KEY (user_id) REFERENCES "authentication-app"."users" (id) ON DELETE CASCADE
 );
 
