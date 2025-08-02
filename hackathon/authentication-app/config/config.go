@@ -31,6 +31,9 @@ type Config struct {
 	LoggerEncoding         string `mapstructure:"logger_encoding"`
 	LoggerLevel            string `mapstructure:"logger_level"`
 	LoggerIsFullPathCaller bool   `mapstructure:"logger_full_path_caller"`
+
+	JWTSecret        string `mapstructure:"jwt_secret"`
+	JWTExpireMinutes int    `mapstructure:"jwt_expire_minutes"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -61,6 +64,9 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("postgresql_con_max_life_time", "POSTGRESQL_CON_MAX_LIFE_TIME")
 	viper.BindEnv("postgresql_timeout", "POSTGRESQL_TIMEOUT")
 	viper.BindEnv("postgresql_debug", "POSTGRESQL_DEBUG")
+
+	viper.BindEnv("jwt_secret", "JWT_SECRET")
+	viper.BindEnv("jwt_expire_minutes", "JWT_EXPIRE_MINUTES")
 
 	if err := viper.Unmarshal(cfg); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
