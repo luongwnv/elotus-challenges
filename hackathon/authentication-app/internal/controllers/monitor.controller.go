@@ -12,7 +12,7 @@ import (
 
 type serverHandlers struct {
 	cfg    *config.Config
-	logger *golog.Logger
+	logger golog.Logger
 	rdbIns *gorm.DB
 }
 
@@ -71,7 +71,7 @@ type Handlers interface {
 }
 
 // Create new handler instance
-func NewHandler(cfg *config.Config, logger *golog.Logger, rdb *gorm.DB) (h *serverHandlers) {
+func NewHandler(cfg *config.Config, logger golog.Logger, rdb *gorm.DB) (h *serverHandlers) {
 	return &serverHandlers{
 		cfg:    cfg,
 		logger: logger,
