@@ -131,6 +131,9 @@ func (s *Server) MapHandlers() error {
 	jwtMiddleware := middleware.JWTAuth(s.cfg, s.rdbIns)
 	authGroup.Post("/revoke", jwtMiddleware, authController.RevokeToken)
 
+	fileGroup := app.Group("/files")
+	fileGroup.Post("/upload", jwtMiddleware, authController.UploadFile)
+
 	golog.Info("Loaded all route!")
 
 	return nil

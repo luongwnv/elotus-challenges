@@ -137,6 +137,42 @@ paths:
       summary: Revoke token
       tags:
       - Auth
+  /files/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image file (max 8MB)
+      parameters:
+      - description: Image file to upload
+        in: formData
+        name: data
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "413":
+          description: Request Entity Too Large
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload file
+      tags:
+      - File
 securityDefinitions:
   BearerAuth:
     in: header
