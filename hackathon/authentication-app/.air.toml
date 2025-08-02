@@ -1,12 +1,12 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "tmp"
+tmp_dir = "temp"
 
 [build]
-  cmd = "go build -o ./tmp/main ./cmd/app"
-  bin = "./tmp/main"
+  cmd = "go build -o ./temp/main ./cmd/app"
+  bin = "./temp/main"
   delay = 1000
-  exclude_dir = ["tmp", "vendor", "testdata"]
+  exclude_dir = ["temp", "vendor", "testdata"]
   include_ext = ["go", "tpl", "tmpl", "html"]
   exclude_regex = ["_test.go"]
   exclude_unchanged = false

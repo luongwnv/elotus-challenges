@@ -96,7 +96,7 @@ func (ac *FileController) UploadFile(c *fiber.Ctx) error {
 
 	// Generate unique filename
 	filename := utils.GenerateUniqueFilename(file.Filename)
-	filePath := filepath.Join("/tmp", filename)
+	filePath := filepath.Join("./tmp", filename)
 
 	// Save file to /tmp
 	dst, err := os.Create(filePath)
