@@ -21,5 +21,39 @@ services:
       retries: 5
     restart: unless-stopped
 
+  app:
+    build: .
+    container_name: authentication_app
+    ports:
+      - "2000:2000"
+    environment:
+      PORT: 2000
+      MODE: production
+      READ_TIMEOUT: 60
+      WRITE_TIMEOUT: 60
+      CTX_DEFAULT_TIMEOUT: 60
+      DEBUG: true
+      DB_HOST: postgres
+      DB_USER: user123
+      DB_PASSWORD: pass123
+      DB_NAME: authentication-app
+      DB_SCHEMA: public
+      DB_PORT: 5432
+      DB_SSLMODE: disable
+      POSTGRESQL_MAX_IDLE_CONNS: 30
+      POSTGRESQL_MAX_OPEN_CONNS: 100
+      POSTGRESQL_CON_MAX_LIFE_TIME: 3600
+      POSTGRESQL_TIMEOUT: 30
+      POSTGRESQL_DEBUG: false
+      LOGGER_ENCODING: json
+      LOGGER_LEVEL: info
+      LOGGER_FULL_PATH_CALLER: false
+      JWT_SECRET: luong_secret_key
+      JWT_EXPIRE_MINUTES: 1440
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:
