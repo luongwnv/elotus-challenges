@@ -2,7 +2,9 @@ package main
 
 import (
 	"authentication-app/config"
+	_ "authentication-app/docs"
 	"authentication-app/internal/controllers"
+	database "authentication-app/pkg/database/postgresql"
 	"fmt"
 	"os"
 	"os/signal"
@@ -97,10 +99,9 @@ func (s *Server) MapHandlers() error {
 	})
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://localhost:8080,https://authentication-app.vieon.vn, https://game-authentication-app.vieon.vn",
-		AllowMethods:     "GET,POST,OPTIONS",
-		AllowHeaders:     "Origin, Content-Type, Accept",
-		AllowCredentials: true,
+		AllowOrigins: "*",
+		AllowMethods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
 	app.Use(func(c *fiber.Ctx) error {
@@ -115,9 +116,16 @@ func (s *Server) MapHandlers() error {
 		Format:     "[${ip}] ${time} ${locals:requestid} ${method} ${path} ${status} ${latency}\n",
 	}))
 
-	monitoringHandler := controllers.NewHandler(s.cfg, &s.logger, s.rdbIns)
+	// Health check routes
+	monitoringHandler := controllers.NewHandler(s.cfg, s.logger, s.rdbIns)
 	app.Get("/api/readiness", timeout.New(monitoringHandler.Readiness, time.Duration(s.cfg.ServerCtxDefaultTimeout)*time.Second))
 	app.Get("/api/liveness", monitoringHandler.Liveness)
+
+	// Auth routes
+	authController := controllers.NewAuthController(s.cfg, s.logger, s.rdbIns)
+	authGroup := app.Group("/auth")
+	authGroup.Post("/register", authController.Register)
+
 	golog.Info("Loaded all route!")
 
 	return nil
@@ -152,7 +160,14 @@ func main() {
 		golog.WithCallerPathType(cfg.LoggerIsFullPathCaller),
 	)
 
-	s := NewServer(cfg, nil, Logger(appLogger))
+	// Initialize database
+	db, err := database.New(cfg)
+	if err != nil {
+		appLogger.Errorf("Failed to connect to database: %v", err)
+		golog.Panicf("Database connection failed: %v", err)
+	}
+
+	s := NewServer(cfg, db, Logger(appLogger))
 
 	go func() {
 		defer HandlePanic("HTTP Service")
